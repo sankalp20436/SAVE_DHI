@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+#
+# USAGE
+#   [targets='...'] [savedhi_feature=0|1 ...] [CFLAGS='...'] [LDFLAGS='...'] ./build [-v|-d|-h|--] [cc arguments ...]
+#
+#   By default, you should only need to run ./build
+#
+#   -v: verbose mode, outputs state information and compiler commands.
+#   -d: debug build, modifies default build flags to produce binaries best suited for debugging.
+#   -h: show this usage information.
+#
+#   You can customize the targets that are built using targets='...'. Use targets='all' to build all targets.
+#   By default, we only build the 'savedhi' target.  
+#   See targets_all for all possible targets as well as the features they support and require.
+#
+#   Several features can be enabled or disabled using feature flags.
+#   See the Features section for an overview of the features, their default setting, their meaning and their dependencies.
+#   You will need to have each of the feature's dependencies installed for the build to succeed with that feature enabled.
+#
+#   Finally, the C compiler can be tuned using CFLAGS, LDFLAGS and compiler arguments passed to the script.
+#
+# BUGS
+#   support@savedhi.app
+#
+# AUTHOR
+#   Maarten Billemont
+#
+cd "${BASH_SOURCE%/*}"
+shopt -s extglob
+set -e
+
+
+### CONFIGURATION
+verbose=0
+
+# Options
+while getopts :vdh opt; do
+    case $opt in
+        v)      verbose=1 ;;
+        d)      debug=1 ;;
+        h|?)    sed -n '/^[^#]/q;p' "${BASH_SOURCE##*/}"; exit ;;
+    esac
+done
+shift "$(( OPTIND - 1 ))"
+
+# Targets to build
+targets_all=(
+    savedhi                     # C CLI version of savedhi (needs: savedhi_sodium, optional: savedhi_color, savedhi_json).
+    savedhi-bench               # C CLI savedhi benchmark utility (needs: savedhi_sodium).
+    savedhi-tests               # C savedhi algorithm test suite (needs: savedhi_sodium, savedhi_xml).
+)
+targets_default='savedhi'       # Override with: targets='...' ./build
+targets=${targets[*]:-$targets_default} 
+
+# Features
+savedhi_sodium=${savedhi_sodium:-1} # Implement crypto functions with sodium (depends on libsodium).
+savedhi_json=${savedhi_json:-1}     # Support JSON-based user configuration format (depends on libjson-c).
+savedhi_color=${savedhi_color:-1}   # Colorized identicon (depends on libncurses).
+savedhi_xml=${savedhi_xml:-1}       # XML parsing (depends on libxml2).
+
+# Default build flags
+cflags=( -O3 $CFLAGS ); unset CFLAGS
+ldflags=( $LDFLAGS ); unset LDFLAGS
+if (( debug )); then
+    cflags+=( -O0 -g )
+fi
+
+# Version
+if { savedhi_version=$(git describe --match '*-cli*' --long --dirty) || savedhi_version=$(<VERSION); } 2>/dev/null; then
+    cflags+=( -D"MP_VERSION=$savedhi_version" )
+fi
+echo "Current savedhi source version ${savedhi_version:-<unknown>}..."
+
+# Meta
+if (( verbose )); then
+    echo "savedhi_sodium=${savedhi_sodium}, savedhi_json=${savedhi_json}, savedhi_color=${savedhi_color}, savedhi_xml=${savedhi_xml}"
+    echo "CFLAGS: ${cflags[*]}"
+    echo "LDFLAGS: ${ldflags[*]}"
+    echo "targets: ${targets[*]}"
+fi
+
+
+### TARGET: savedhi
+savedhi() {
+    # dependencies
+    use_savedhi_sodium required
+    use_savedhi_color optional
+    use_savedhi_json optional
+
+    # target
+    cflags=(
+        "${cflags[@]}"
+
+        # savedhi paths
+        -I"api/c" -I"src"
+    )
+    ldflags=(
+        "${ldflags[@]}"
+    )
+
+    # build
+    cc "${cflags[@]}" "$@" \
+       "api/c/aes.c" "api/c/savedhi-algorithm.c" \
+       "api/c/savedhi-algorithm_v0.c" "api/c/savedhi-algorithm_v1.c" "api/c/savedhi-algorithm_v2.c" "api/c/savedhi-algorithm_v3.c" \
+       "api/c/savedhi-types.c" "api/c/savedhi-util.c" "api/c/savedhi-marshal-util.c" "api/c/savedhi-marshal.c" "src/savedhi-cli-util.c" \
+       "${ldflags[@]}" "src/savedhi-cli.c" -o "savedhi"
+    echo "done!  You can now run ./savedhi-cli-tests, ./install or use ./$_"
+}
+
+
+### TARGET: savedhi-BENCH
+savedhi-bench() {
+    # dependencies
+    use_savedhi_sodium required
+
+    # target
+    cflags=(
+        "${cflags[@]}"
+
+        # savedhi paths
+        -I"api/c" -I"src"
+    )
+    ldflags=(
+        "${ldflags[@]}"
+    )
+
+    # build
+    cc "${cflags[@]}" "$@" \
+       "api/c/aes.c" "api/c/savedhi-algorithm.c" \
+       "api/c/savedhi-algorithm_v0.c" "api/c/savedhi-algorithm_v1.c" "api/c/savedhi-algorithm_v2.c" "api/c/savedhi-algorithm_v3.c" \
+       "api/c/savedhi-types.c" "api/c/savedhi-util.c" \
+       "${ldflags[@]}" "src/savedhi-bench.c" -o "savedhi-bench"
+    echo "done!  You can now use ./$_"
+}
+
+
+### TARGET: savedhi-TESTS
+savedhi-tests() {
+    # dependencies
+    use_savedhi_sodium required
+    use_savedhi_xml required
+
+    # target
+    cflags=(
+        "${cflags[@]}"
+
+        # savedhi paths
+        -I"api/c" -I"src"
+    )
+    ldflags=(
+        "${ldflags[@]}"
+    )
+
+    # build
+    cc "${cflags[@]}" "$@" \
+       "api/c/aes.c" "api/c/savedhi-algorithm.c" \
+       "api/c/savedhi-algorithm_v0.c" "api/c/savedhi-algorithm_v1.c" "api/c/savedhi-algorithm_v2.c" "api/c/savedhi-algorithm_v3.c" \
+       "api/c/savedhi-types.c" "api/c/savedhi-util.c" "src/savedhi-tests-util.c" \
+       "${ldflags[@]}" "src/savedhi-tests.c" -o "savedhi-tests"
+    echo "done!  You can now use ./$_"
+}
+
+
+### TOOLS
+haslib() {
+    cc -x c "${ldflags[@]}" -l"$1" -o /dev/null - <<< 'int main() { return 0; }' &>/dev/null
+}
+cc() (
+    (( verbose )) && set -x
+
+    if { hash "$CC"; } 2>/dev/null; then
+        "$CC" -std=c11 "$@"
+    elif { hash clang; } 2>/dev/null; then
+        clang -std=c11 "$@"
+    elif { hash llvm-gcc; } 2>/dev/null; then
+        llvm-gcc -std=c11 "$@"
+    elif { hash gcc; } 2>/dev/null; then
+        gcc -std=c11 "$@"
+    else
+        echo >&2 "Need a compiler.  Please install GCC or LLVM."
+        exit 1
+    fi
+)
+
+
+### DEPENDENCIES
+use() {
+    local option=$1 requisite=$2 lib=$3; shift 3
+    local enabled=${!option}
+
+    if (( enabled )); then
+        if haslib "$lib"; then
+            for lib in "$lib" "$@"; do
+                haslib "$lib" && ldflags+=( -l"$lib" )
+            done
+            echo "INFO:     Enabled $option (lib$lib)."
+            return 0
+
+        elif [[ $requisite == required ]]; then
+            echo >&2 "ERROR:    $option was enabled but is missing $lib library.  Please install this library before continuing."
+            exit 1
+
+        else
+            echo >&2 "WARNING:  $option was enabled but is missing $lib library.  Will continue with $option disabled!"
+            return 1
+
+        fi
+
+    elif [[ $requisite == required ]]; then
+        echo >&2 "ERROR:    $option was required but is not enabled.  Please enable the option or remove this target before continuing."
+        exit 1
+
+    else
+        echo "INFO:     $option is supported but not enabled."
+        return 1
+    fi
+}
+use_savedhi_sodium() {
+    local requisite=$1
+    use savedhi_sodium "$requisite" sodium && cflags+=( -D"savedhi_SODIUM=1" ) ||:
+}
+use_savedhi_color() {
+    local requisite=$1
+    use savedhi_color "$requisite" curses tinfo && cflags+=( -D"savedhi_COLOR=1" ) ||:
+}
+use_savedhi_json() {
+    local requisite=$1
+    use savedhi_json "$requisite" json-c && cflags+=( -D"savedhi_JSON=1" ) ||:
+}
+use_savedhi_xml() {
+    local requisite=$1
+    use savedhi_xml "$requisite" xml2 && cflags+=( $(xml2-config --cflags) ) ldflags+=( $(xml2-config --libs) ) ||:
+}
+
+
+### BUILD TARGETS
+for target in "${targets_all[@]}"; do
+    if [[ $targets == 'all' || " $targets " = *" $target "*  ]]; then
+        echo
+        echo "Building target: $target..."
+        ( "$target" "$@" )
+    fi
+done

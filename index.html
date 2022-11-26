@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>SaveDHI</title>
+        <meta name="description" content="SaveDhi Password manager and secure identity platform." />
+        <meta name="keywords" content="password manager,password generator,passwords,free,secure,strong,random,online,offline,privacy,web" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="theme-color" content="#3E8989">
+        <meta property="og:image" content="images/product/environment/spectre-dark-desk.jpg">
+        <meta name="author" content="Kshitij Kumar Singh Chauhan | Sankalp Varma">
+        <link rel="author" href="https://github.com/Kshitij-Kumar-Singh-Chauhan">
+        <link rel="icon" href="images/savedhi.png">
+        <link rel="stylesheet" href="plugins/bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" href="plugins/fontawesome/css/all.min.css">
+        <link rel="stylesheet" href="css/savedhi-base.css" media="screen">
+        <link rel="stylesheet" href="css/savedhi-web.css" media="screen">
+        <script defer src="plugins/jquery/jquery.min.js"></script>
+    </head>
+
+    <body>
+        <div class="row wow fadeInUp" data-wow-duration="500ms">
+                    <div class="col-12 text-center">
+                        <div class="copyright">
+<h4>CRYPTOGRAPHY (CS303C)</h4>
+                            <a href="https://www.iiitnr.ac.in/">
+                                <img src="images/savedhi.png" alt="SaveDHI, Password Manager, Cryptography" height="42">
+                            </a><br>
+        <section id="application">
+            <div id="user" class="container" data-active="true">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6 text-center box">
+                        <h8>SaveDHI</h8><h5>A Stateless Password Manager</h5><br>
+                        <hr>
+
+                        <form>
+                            <p>
+                                <label id="userName">
+                                    <i class="fa-duotone fa-fw fa-user-large"></i>
+                                    Your Full Name
+                                    <input type="text" placeholder="eg. Aman Singh" autocomplete="username">
+                                </label>
+                            </p>
+
+                            <p>
+                                <label id="userSecret">
+                                    <i class="fa-duotone fa-fw fa-user-lock"></i>
+                                    Your SaveDHI Secret
+                                    <i class="fa-duotone fa-fw fa-galaxy fa-spin"></i>
+                                    <input type="password" placeholder="eg. I am master password!" autocomplete="current-password">
+                                </label>
+                            </p>
+
+                            <p>
+                                <label id="algorithmVersion">
+                                    <i class="fa-duotone fa-fw fa-rectangle-vertical-history"></i>
+                                    Algorithm Version
+                                    <select>
+                                        <option value="3" selected>Ver. 1</option>
+                                        <option value="2" selected>Ver. 2</option>
+                                    </select>
+                                </label>
+                            </p>
+
+                            <hr>
+    
+                            <p class="info"></p>
+                            <p class="error"></p>
+    
+                            <p>
+                                <button type="submit" id="signin">
+                                    <i class="fa-duotone fa-fw fa-2x fa-right-to-bracket"></i><br>
+                                    Sign In
+                                </button>
+                            </p>
+<br>
+                        </form>
+
+                        <p class="caption">Simple and Secure</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="site" class="container" data-active="false">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6 text-center box">
+                        <i class="fa-duotone fa-globe"></i>
+                        <hr>
+
+                        <form>
+                            <p>
+                                <label id="siteName">
+                                    <i class="fa-duotone fa-fw fa-globe"></i>
+                                    Site Domain
+                                    <input type="text" placeholder="eg. Youtube.com">
+                                </label>
+                            </p>
+                            
+                            <p>&nbsp;</p>
+
+                            <p>
+                                <input type="radio" name="sitePurpose" id="sitePurposePassword" value="com.lyndir.masterpassword">
+                                <label for="sitePurposePassword">Site Password</label>
+                        
+                            </p>
+
+                            <hr>
+    
+                            <p>
+                                <label id="siteCounter">
+                                    <i class="fa-duotone fa-fw fa-rectangle-vertical-history"></i>
+                                    Site Type
+                                    <select>
+                                        <option value=1 selected>General</option>
+                                        <option value=16761 selected>Sensitive</option>
+                                    </select>
+                                </label>
+                            </p>
+    
+                            <p>
+                                <label id="siteType">
+                                    <i class="fa-duotone fa-fw fa-rectangle-vertical-history"></i>
+                                    Password Type
+                                    <select></select>
+                                </label>
+                            </p>
+    
+                            <p>
+                                <label id="siteResult">
+                                    <i class="fa-duotone fa-fw" style="background: url('images/savedhi.png') no-repeat center/contain"></i>
+                                    Result
+                                    <i class="fa-duotone fa-fw fa-galaxy fa-spin"></i>
+                                    <button type="submit" class="fa-solid fa-copy">
+                                        <input class="code" value="PozoLalv0_Yelo" readonly="">
+                                    </button>
+                                </label>
+                            </p>
+                        </form>
+
+                        <p class="info"></p>
+                        <p class="error"></p>
+
+                        <hr>
+
+                        <p>
+                            <button type="submit" id="signout">
+                                <i class="fa-duotone fa-fw fa-2x fa-right-from-bracket"></i><br>
+                                Sign Out
+                            </button><br>
+                        </p>
+
+                        <p class="caption">Simple and Secure</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <footer id="footer">
+            <div class="container">
+<div class="banner">
+            <div class="container">
+           
+    
+            </div>
+        </div>
+                       
+		<p>Connect to us !</p><br>
+		<a href="https://github.com/Kshitij-Kumar-Singh-Chauhan" class="btn btn-transparent">Contribute on GitHub</a>
+		<a href="https://www.linkedin.com/in/kshitijkumarsinghchauhan/" class="btn btn-transparent">Kshitij K.S. Chauhan</a>
+		<a href="https://www.linkedin.com/in/sankalpvarma2506/" class="btn btn-transparent">Sankalp Varma</a><br><br>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script defer src="plugins/bootstrap/bootstrap.bundle.min.js"></script>
+        <script defer src="js/spectre/spectre-types.js"></script>
+        <script defer src="js/spectre/spectre-service.js"></script>
+        <script defer src="js/main.js"></script>
+    </body>
+
+</html>
